@@ -2,31 +2,45 @@
 
 namespace Zobay\LaravelSslCommerz;
 
-use Zobay\LaravelSslCommerz\Contracts\SslCommerzClientInterface;
+use Illuminate\Support\Facades\Http;
 use Zobay\LaravelSslCommerz\Data\PaymentRequest;
 use Zobay\LaravelSslCommerz\Data\PaymentSession;
 use Zobay\LaravelSslCommerz\Data\ValidationResult;
+use Zobay\LaravelSslCommerz\Exceptions\OrderValidationException;
+use Zobay\LaravelSslCommerz\Exceptions\PaymentInitiationException;
 
 class LaravelSslCommerz
 {
-    private SslCommerzClientInterface $client;
+    private string $storeId;
+    private string $storePassword;
 
     public function __construct()
     {
-        $baseUrl = config('sslcommerz.sandbox')
-            ? config('sslcommerz.sandbox_base_url')
-            : config('sslcommerz.live_base_url');
-
-        $this->client = new SslCommerzApiClient(
-            storeId:       config('sslcommerz.credentials.store_id'),
-            storePassword: config('sslcommerz.credentials.store_passwd'),
-            baseUrl:       $baseUrl,
-        );
+        $this->storeId       = config('sslcommerz.credentials.store_id');
+        $this->storePassword = config('sslcommerz.credentials.store_passwd');
     }
 
     public function initiatePayment(PaymentRequest $request): PaymentSession
     {
-        return $this->client->initiatePayment($request);
+        $payload = array_merge($request->toArray(), [
+            'store_id'     => $this->storeId,
+            'store_passwd' => $this->storePassword,
+        ]);
+
+        $response = Http::sslcommerz()
+            ->post(config('sslcommerz.paths.init'), $payload)
+            ->throw()
+            ->json();
+
+        $session = PaymentSession::fromApiResponse($response);
+
+        if (! $session->success) {
+            throw new PaymentInitiationException(
+                $session->failedReason ?? 'Payment initiation failed'
+            );
+        }
+
+        return $session;
     }
 
     public function validateOrder(
@@ -35,11 +49,56 @@ class LaravelSslCommerz
         float  $amount,
         string $currency = 'BDT',
     ): ValidationResult {
-        return $this->client->validateOrder($valId, $tranId, $amount, $currency);
+        $response = Http::sslcommerz()
+            ->get(config('sslcommerz.paths.validation'), [
+                'val_id'       => $valId,
+                'store_id'     => $this->storeId,
+                'store_passwd' => $this->storePassword,
+                'v'            => 1,
+                'format'       => 'json',
+            ])
+            ->throw()
+            ->json();
+
+        $result = ValidationResult::fromApiResponse($response);
+
+        if ($result->isValid()) {
+            if ($currency === 'BDT') {
+                if ($tranId !== $result->tranId || abs($amount - $result->amount) >= 1) {
+                    throw new OrderValidationException('Data has been tampered');
+                }
+            } elseif (
+                $tranId !== $result->tranId
+                || abs($amount - (float) $result->currencyAmount) >= 1
+                || $currency !== $result->currencyType
+            ) {
+                throw new OrderValidationException('Data has been tampered');
+            }
+        }
+
+        return $result;
     }
 
     public function verifyIpnHash(array $postData): bool
     {
-        return $this->client->verifyIpnHash($postData);
+        if (! isset($postData['verify_sign'], $postData['verify_key'])) {
+            return false;
+        }
+
+        $keys = explode(',', $postData['verify_key']);
+        $data = array_intersect_key($postData, array_flip($keys));
+        $data['store_passwd'] = md5($this->storePassword);
+        ksort($data);
+
+        $hashString = rtrim(
+            implode('&', array_map(
+                fn (string $k, mixed $v) => "$k=$v",
+                array_keys($data),
+                array_values($data),
+            )),
+            '&',
+        );
+
+        return hash_equals(md5($hashString), $postData['verify_sign']);
     }
 }

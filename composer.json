@@ -61,7 +61,7 @@
                 "Zobay\\LaravelSslCommerz\\LaravelSslCommerzServiceProvider"
             ],
             "aliases": {
-                "LaravelSslCommerz": "Zobay\\LaravelSslCommerz\\Facades\\LaravelSslCommerz"
+                "SslCommerz": "Zobay\\LaravelSslCommerz\\Facades\\SslCommerz"
             }
         }
     },

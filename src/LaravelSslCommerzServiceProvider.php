@@ -2,6 +2,7 @@
 
 namespace Zobay\LaravelSslCommerz;
 
+use Illuminate\Support\Facades\Http;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Zobay\LaravelSslCommerz\Commands\LaravelSslCommerzCommand;
@@ -14,14 +15,22 @@ class LaravelSslCommerzServiceProvider extends PackageServiceProvider
             ->name('laravel-sslcommerz')
             ->hasConfigFile()
             ->hasViews()
-            ->hasMigration('create_laravel_sslcommerz_table')
             ->hasCommand(LaravelSslCommerzCommand::class);
     }
 
-    public function register(): void
+    public function packageRegistered(): void
     {
-        parent::register();
-
         $this->app->singleton(LaravelSslCommerz::class, fn () => new LaravelSslCommerz());
+    }
+
+    public function packageBooted(): void
+    {
+        Http::macro('sslcommerz', function () {
+            $baseUrl = config('sslcommerz.sandbox')
+                ? config('sslcommerz.sandbox_base_url')
+                : config('sslcommerz.live_base_url');
+
+            return Http::baseUrl($baseUrl)->asForm();
+        });
     }
 }
