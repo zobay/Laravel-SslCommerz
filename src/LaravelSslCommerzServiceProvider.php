@@ -13,7 +13,7 @@ class LaravelSslCommerzServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('laravel-sslcommerz')
-            ->hasConfigFile()
+            ->hasConfigFile('sslcommerz')
             ->hasViews()
             ->hasCommand(LaravelSslCommerzCommand::class);
     }
