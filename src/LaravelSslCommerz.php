@@ -3,9 +3,9 @@
 namespace Zobay\LaravelSslCommerz;
 
 use Illuminate\Support\Facades\Http;
-use Zobay\LaravelSslCommerz\Data\PaymentRequest;
-use Zobay\LaravelSslCommerz\Data\PaymentSession;
-use Zobay\LaravelSslCommerz\Data\ValidationResult;
+use Zobay\LaravelSslCommerz\DTOs\PaymentRequest;
+use Zobay\LaravelSslCommerz\DTOs\PaymentSession;
+use Zobay\LaravelSslCommerz\DTOs\ValidationResult;
 use Zobay\LaravelSslCommerz\Exceptions\OrderValidationException;
 use Zobay\LaravelSslCommerz\Exceptions\PaymentInitiationException;
 

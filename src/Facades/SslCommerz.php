@@ -3,9 +3,9 @@
 namespace Zobay\LaravelSslCommerz\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Zobay\LaravelSslCommerz\Data\PaymentRequest;
-use Zobay\LaravelSslCommerz\Data\PaymentSession;
-use Zobay\LaravelSslCommerz\Data\ValidationResult;
+use Zobay\LaravelSslCommerz\DTOs\PaymentRequest;
+use Zobay\LaravelSslCommerz\DTOs\PaymentSession;
+use Zobay\LaravelSslCommerz\DTOs\ValidationResult;
 
 /**
  * @see \Zobay\LaravelSslCommerz\LaravelSslCommerz
