@@ -7,7 +7,7 @@ use Zobay\LaravelSslCommerz\Enums\ShippingMethod;
 final readonly class ShipmentInfo
 {
     public function __construct(
-        public ShippingMethod $method,
+        public ShippingMethod $method               = ShippingMethod::No,
         public int            $numOfItems           = 1,
         public ?string        $name                 = null,
         public ?string        $address1             = null,

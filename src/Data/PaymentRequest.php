@@ -12,8 +12,8 @@ final readonly class PaymentRequest
         public string       $failUrl,
         public string       $cancelUrl,
         public CustomerInfo $customer,
-        public ShipmentInfo $shipment,
         public ProductInfo  $product,
+        public ?ShipmentInfo $shipment      = null,
         public ?string      $ipnUrl        = null,
         public ?EmiOptions  $emi           = null,
         public ?string      $multiCardName = null,
@@ -45,8 +45,8 @@ final readonly class PaymentRequest
         $merged = array_merge(
             $base,
             $this->customer->toArray(),
-            $this->shipment->toArray(),
             $this->product->toArray(),
+            ($this->shipment ?? new ShipmentInfo())->toArray(),
             ($this->emi ?? new EmiOptions())->toArray(),
         );
 
