@@ -3,6 +3,7 @@
 namespace Zobay\LaravelSslCommerz;
 
 use Illuminate\Support\Facades\Http;
+use Zobay\LaravelSslCommerz\DTOs\IpnData;
 use Zobay\LaravelSslCommerz\DTOs\PaymentRequest;
 use Zobay\LaravelSslCommerz\DTOs\PaymentSession;
 use Zobay\LaravelSslCommerz\DTOs\ValidationRequest;
@@ -78,14 +79,10 @@ class LaravelSslCommerz
         return $result;
     }
 
-    public function verifyIpnHash(array $postData): bool
+    public function verifyIpnHash(IpnData $payload): bool
     {
-        if (! isset($postData['verify_sign'], $postData['verify_key'])) {
-            return false;
-        }
-
-        $keys = explode(',', $postData['verify_key']);
-        $data = array_intersect_key($postData, array_flip($keys));
+        $keys = explode(',', $payload->verifyKey);
+        $data = array_intersect_key($payload->getRaw(), array_flip($keys));
         $data['store_passwd'] = md5($this->storePassword);
         ksort($data);
 
@@ -98,6 +95,6 @@ class LaravelSslCommerz
             '&',
         );
 
-        return hash_equals(md5($hashString), $postData['verify_sign']);
+        return hash_equals(md5($hashString), $payload->verifySign);
     }
 }
