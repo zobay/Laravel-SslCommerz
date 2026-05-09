@@ -2,7 +2,7 @@
 
 namespace Zobay\LaravelSslCommerz\DTOs;
 
-final readonly class CustomerInfo
+final readonly class CustomerData
 {
     public function __construct(
         public string  $name,

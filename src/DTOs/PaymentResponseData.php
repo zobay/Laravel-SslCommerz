@@ -2,7 +2,7 @@
 
 namespace Zobay\LaravelSslCommerz\DTOs;
 
-final readonly class PaymentSession
+final readonly class PaymentResponseData
 {
     public function __construct(
         public bool    $success,

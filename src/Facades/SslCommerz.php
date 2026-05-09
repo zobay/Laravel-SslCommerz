@@ -3,15 +3,15 @@
 namespace Zobay\LaravelSslCommerz\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use Zobay\LaravelSslCommerz\DTOs\PaymentRequest;
-use Zobay\LaravelSslCommerz\DTOs\PaymentSession;
-use Zobay\LaravelSslCommerz\DTOs\ValidationResult;
+use Zobay\LaravelSslCommerz\DTOs\PaymentRequestData;
+use Zobay\LaravelSslCommerz\DTOs\PaymentResponseData;
+use Zobay\LaravelSslCommerz\DTOs\ValidationResponseData;
 
 /**
  * @see \Zobay\LaravelSslCommerz\LaravelSslCommerz
  *
- * @method static PaymentSession   initiatePayment(PaymentRequest $request)
- * @method static ValidationResult validateOrder(string $valId, string $tranId, float $amount, string $currency = 'BDT')
+ * @method static PaymentResponseData   initiatePayment(PaymentRequestData $request)
+ * @method static ValidationResponseData validateOrder(string $valId, string $tranId, float $amount, string $currency = 'BDT')
  * @method static bool             verifyIpnHash(array $postData)
  */
 class SslCommerz extends Facade

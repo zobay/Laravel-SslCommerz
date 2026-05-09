@@ -4,7 +4,7 @@ namespace Zobay\LaravelSslCommerz\DTOs;
 
 use Zobay\LaravelSslCommerz\Enums\PaymentStatus;
 
-final readonly class ValidationResult
+final readonly class ValidationResponseData
 {
     public function __construct(
         public PaymentStatus $status,

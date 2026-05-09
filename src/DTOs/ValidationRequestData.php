@@ -2,7 +2,7 @@
 
 namespace Zobay\LaravelSslCommerz\DTOs;
 
-final readonly class ValidationRequest
+final readonly class ValidationRequestData
 {
     public function __construct(
         public string $valId,

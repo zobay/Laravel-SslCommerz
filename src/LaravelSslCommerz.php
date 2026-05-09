@@ -4,10 +4,10 @@ namespace Zobay\LaravelSslCommerz;
 
 use Illuminate\Support\Facades\Http;
 use Zobay\LaravelSslCommerz\DTOs\IpnData;
-use Zobay\LaravelSslCommerz\DTOs\PaymentRequest;
-use Zobay\LaravelSslCommerz\DTOs\PaymentSession;
-use Zobay\LaravelSslCommerz\DTOs\ValidationRequest;
-use Zobay\LaravelSslCommerz\DTOs\ValidationResult;
+use Zobay\LaravelSslCommerz\DTOs\PaymentRequestData;
+use Zobay\LaravelSslCommerz\DTOs\PaymentResponseData;
+use Zobay\LaravelSslCommerz\DTOs\ValidationRequestData;
+use Zobay\LaravelSslCommerz\DTOs\ValidationResponseData;
 use Zobay\LaravelSslCommerz\Exceptions\OrderValidationException;
 use Zobay\LaravelSslCommerz\Exceptions\PaymentInitiationException;
 
@@ -22,7 +22,7 @@ class LaravelSslCommerz
         $this->storePassword = config('sslcommerz.credentials.store_passwd');
     }
 
-    public function initiatePayment(PaymentRequest $request): PaymentSession
+    public function initiatePayment(PaymentRequestData $request): PaymentResponseData
     {
         $payload = array_merge($request->toArray(), [
             'store_id'     => $this->storeId,
@@ -34,7 +34,7 @@ class LaravelSslCommerz
             ->throw()
             ->json();
 
-        $session = PaymentSession::fromApiResponse($response);
+        $session = PaymentResponseData::fromApiResponse($response);
 
         if (! $session->success) {
             throw new PaymentInitiationException(
@@ -45,7 +45,7 @@ class LaravelSslCommerz
         return $session;
     }
 
-    public function validateOrder(ValidationRequest $validationRequest): ValidationResult
+    public function validateOrder(ValidationRequestData $validationRequest): ValidationResponseData
     {
         $response = Http::sslcommerz()
             ->get(config('sslcommerz.paths.validation'), array_merge(
@@ -60,7 +60,7 @@ class LaravelSslCommerz
             ->throw()
             ->json();
 
-        $result = ValidationResult::fromApiResponse($response);
+        $result = ValidationResponseData::fromApiResponse($response);
 
         if ($result->isValid()) {
             if ($validationRequest->currency === 'BDT') {

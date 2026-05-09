@@ -4,7 +4,7 @@ namespace Zobay\LaravelSslCommerz\DTOs;
 
 use Zobay\LaravelSslCommerz\Enums\ProductProfile;
 
-final readonly class ProductInfo
+final readonly class ProductData
 {
     public function __construct(
         public string         $name,

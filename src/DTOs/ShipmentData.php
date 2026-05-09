@@ -4,7 +4,7 @@ namespace Zobay\LaravelSslCommerz\DTOs;
 
 use Zobay\LaravelSslCommerz\Enums\ShippingMethod;
 
-final readonly class ShipmentInfo
+final readonly class ShipmentData
 {
     public function __construct(
         public ShippingMethod $method               = ShippingMethod::No,

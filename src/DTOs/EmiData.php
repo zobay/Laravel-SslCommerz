@@ -2,7 +2,7 @@
 
 namespace Zobay\LaravelSslCommerz\DTOs;
 
-final readonly class EmiOptions
+final readonly class EmiData
 {
     public function __construct(
         public bool $enabled       = false,
