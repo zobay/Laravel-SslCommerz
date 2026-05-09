@@ -5,6 +5,7 @@ namespace Zobay\LaravelSslCommerz;
 use Illuminate\Support\Facades\Http;
 use Zobay\LaravelSslCommerz\DTOs\PaymentRequest;
 use Zobay\LaravelSslCommerz\DTOs\PaymentSession;
+use Zobay\LaravelSslCommerz\DTOs\ValidationRequest;
 use Zobay\LaravelSslCommerz\DTOs\ValidationResult;
 use Zobay\LaravelSslCommerz\Exceptions\OrderValidationException;
 use Zobay\LaravelSslCommerz\Exceptions\PaymentInitiationException;
@@ -43,34 +44,32 @@ class LaravelSslCommerz
         return $session;
     }
 
-    public function validateOrder(
-        string $valId,
-        string $tranId,
-        float  $amount,
-        string $currency = 'BDT',
-    ): ValidationResult {
+    public function validateOrder(ValidationRequest $validationRequest): ValidationResult
+    {
         $response = Http::sslcommerz()
-            ->get(config('sslcommerz.paths.validation'), [
-                'val_id'       => $valId,
-                'store_id'     => $this->storeId,
-                'store_passwd' => $this->storePassword,
-                'v'            => 1,
-                'format'       => 'json',
-            ])
+            ->get(config('sslcommerz.paths.validation'), array_merge(
+                [
+                    'store_id'     => $this->storeId,
+                    'store_passwd' => $this->storePassword,
+                    'v'            => config('sslcommerz.validation_version'),
+                    'format'       => 'json',
+                ],
+                $validationRequest->toArray(),
+            ))
             ->throw()
             ->json();
 
         $result = ValidationResult::fromApiResponse($response);
 
         if ($result->isValid()) {
-            if ($currency === 'BDT') {
-                if ($tranId !== $result->tranId || abs($amount - $result->amount) >= 1) {
+            if ($validationRequest->currency === 'BDT') {
+                if ($validationRequest->tranId !== $result->tranId || abs($validationRequest->amount - $result->amount) >= 1) {
                     throw new OrderValidationException('Data has been tampered');
                 }
             } elseif (
-                $tranId !== $result->tranId
-                || abs($amount - (float) $result->currencyAmount) >= 1
-                || $currency !== $result->currencyType
+                $validationRequest->tranId !== $result->tranId
+                || abs($validationRequest->amount - (float) $result->currencyAmount) >= 1
+                || $validationRequest->currency !== $result->currencyType
             ) {
                 throw new OrderValidationException('Data has been tampered');
             }
